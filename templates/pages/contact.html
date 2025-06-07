@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block main %}
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+
+<div class="contact-container">
+    {% if user.is_authenticated %}
+    <div class="contact-header">
+        <h1>Contact <span>Us</span></h1>
+        <p>We'd love to hear from you! Fill out the form below or reach us through the info provided.</p>
+    </div>
+    <div class="contact-content">
+        <form class="contact-form" method="POST" action="{% url 'contact' %}">
+            <p>{{ error }}</p>
+            <p>{{ success }}</p>
+            {{ csrf_token }}
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="fullName" placeholder="Your Name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="5" placeholder="Type your message..." required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Send Message</button>
+        </form>
+        <div class="contact-info">
+            <h2>Get in Touch</h2>
+            <ul>
+                <li><strong>Email:</strong> info@example.com</li>
+                <li><strong>Phone:</strong> +123 456 7890</li>
+                <li><strong>Address:</strong> 123 Creative St, City, Country</li>
+            </ul>
+        </div>
+    </div>
+    {% else %}
+    <div class="contact-header">
+        <h1>Contact <span>Us</span></h1>
+        <p>Please log in to contact us.</p>
+        <a href="{% url 'login' %}" class="login-link">Log in</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

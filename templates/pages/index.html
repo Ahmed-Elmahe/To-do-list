@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}TodoFlow - Home{% endblock %}
+
+{% block main %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+
+{% if user.is_authenticated %}
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-check-circle"></i> Nexus Tasks</h1>
+        <div class="date-display">{{ today }}</div>
+    </div>
+
+    <div class="input-section">
+        <form method="POST" action="{% url 'create_task' %}">
+            {% csrf_token %}
+            <input type="text" id="taskInput" name="title" placeholder="Add a new task..." required>
+            <input type="text" id="taskDescription" name="description" placeholder="Task description (optional)">
+            <button class="add-btn" id="addBtn">Add Task</button>
+        </form>
+    </div>
+
+    <div class="controls">
+        <div class="filters">
+            <button class="filter-btn active" id="filterAll" data-filter="all" aria-pressed="true" onclick="showTasks('all', this)">All Tasks</button>
+            <button class="filter-btn" id="filterActive" data-filter="active" aria-pressed="false" onclick="showTasks('active', this)">Active</button>
+            <button class="filter-btn" id="filterCompleted" data-filter="completed" aria-pressed="false" onclick="showTasks('completed', this)">Completed</button>
+        </div>
+        <form method="POST" action="{% url 'delete_completed_tasks' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="clear-btn" id="clearBtn">Clear Completed</button>
+        </form>
+    </div>
+
+    <div class="stats">
+        <div class="tasks-total">
+            Total: <span id="totalCount">{{ tasks.count }}</span> tasks
+        </div>
+        <div class="tasks-completed">
+            Completed: <span id="completedCount">{{ completed }}</span> tasks
+        </div>
+        <div class="tasks-pending">
+            Pending: <span id="pendingCount">{{ pending }}</span> tasks
+        </div>
+    </div>
+
+    <div class="task-list" id="taskList">
+        <div id="allTasksDiv">
+            {% if tasks.count > 0 %}
+                {% for task in tasks %}
+                <div class="task-item {% if task.completed %}completed{% endif %}" data-id="{{ task.id }}">
+                    <div class="task-content">
+                        <h3 class="task-title">{{ task.title }}</h3>
+                        {% if task.description %}
+                        <p class="task-description">{{ task.description }}</p>
+                        {% endif %}
+                        <span class="task-date">{{ task.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="task-meta">
+                        <form action="{% url 'update_task' task.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="checkbox" name="completed" class="task-checkbox" {% if task.completed %}checked{% endif %} onchange="this.form.submit();">
+                        </form>
+                        <div class="task-actions">
+                            <a href="#" class="edit-btn" onclick="event.preventDefault(); this.closest('.task-item').querySelector('.edit-form').style.display='block';"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'delete_task' task.id %}" class="delete-btn"><i class="fas fa-trash-alt"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="edit-form" style="display: none;">
+                        <form action="{% url 'update_task' task.id %}" method="POST">
+                            {% csrf_token %}
+                            <input type="text" class="edit-input" name="title" value="{{ task.title }}">
+                            <input type="text" class="edit-description" name="description" value="{{ task.description }}">
+                            <input type="hidden" name="id" value="{{ task.id }}">
+                            <div class="form-actions">
+                                <button class="save-btn">Save</button>
+                                <button class="cancel-btn" type="button" onclick="this.closest('.edit-form').style.display='none';">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No tasks yet</h3>
+                    <p>Add your first task to get started!</p>
+                </div>
+            {% endif %}
+        </div>
+        <div id="completedTasksDiv" style="display:none;">
+            {% for task in tasks %}
+                {% if task.completed %}
+                <div class="task-item completed" data-id="{{ task.id }}">
+                    <div class="task-content">
+                        <h3 class="task-title">{{ task.title }}</h3>
+                        {% if task.description %}
+                        <p class="task-description">{{ task.description }}</p>
+                        {% endif %}
+                        <span class="task-date">{{ task.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="task-meta">
+                        <form action="{% url 'update_task' task.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="checkbox" name="completed" class="task-checkbox" checked onchange="this.form.submit();">
+                        </form>
+                        <div class="task-actions">
+                            <a href="#" class="edit-btn" onclick="event.preventDefault(); this.closest('.task-item').querySelector('.edit-form').style.display='block';"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'delete_task' task.id %}" class="delete-btn"><i class="fas fa-trash-alt"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="edit-form" style="display: none;">
+                        <form action="{% url 'update_task' task.id %}" method="POST">
+                            {% csrf_token %}
+                            <input type="text" class="edit-input" name="title" value="{{ task.title }}">
+                            <input type="text" class="edit-description" name="description" value="{{ task.description }}">
+                            <input type="hidden" name="id" value="{{ task.id }}">
+                            <div class="form-actions">
+                                <button class="save-btn">Save</button>
+                                <button class="cancel-btn" type="button" onclick="this.closest('.edit-form').style.display='none';">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No tasks completed</h3>
+                    <p>Completed tasks will appear here.</p>
+                </div>
+                {% endif %}
+            {% endfor %}
+
+        </div>
+        <div id="incompleteTasksDiv" style="display:none;">
+            {% for task in tasks %}
+                {% if not task.completed %}
+                <div class="task-item" data-id="{{ task.id }}">
+                    <div class="task-content">
+                        <h3 class="task-title">{{ task.title }}</h3>
+                        {% if task.description %}
+                        <p class="task-description">{{ task.description }}</p>
+                        {% endif %}
+                        <span class="task-date">{{ task.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="task-meta">
+                        <form action="{% url 'update_task' task.id %}" method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="checkbox" name="completed" class="task-checkbox" onchange="this.form.submit();">
+                        </form>
+                        <div class="task-actions">
+                            <a href="#" class="edit-btn" onclick="event.preventDefault(); this.closest('.task-item').querySelector('.edit-form').style.display='block';"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'delete_task' task.id %}" class="delete-btn"><i class="fas fa-trash-alt"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="edit-form" style="display: none;">
+                        <form action="{% url 'update_task' task.id %}" method="POST">
+                            {% csrf_token %}
+                            <input type="text" class="edit-input" name="title" value="{{ task.title }}">
+                            <input type="text" class="edit-description" name="description" value="{{ task.description }}">
+                            <input type="hidden" name="id" value="{{ task.id }}">
+                            <div class="form-actions">
+                                <button class="save-btn">Save</button>
+                                <button class="cancel-btn" type="button" onclick="this.closest('.edit-form').style.display='none';">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>No tasks for doing</h3>
+                    <p>Add your task to get started!</p>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Drag tasks to reorder • click to edit</p>
+    </div>
+</div>
+{% else %}
+<div class="hero">
+    <h1>Welcome to TodoFlow!</h1>
+    <p>Streamline your tasks and boost your productivity. Join our community of go-getters and take control of your day,
+        one task at a time.</p>
+    <button class="join-btn" id="joinNow">Join Now</button>
+</div>
+{% endif %}
+<script src="{% static 'js/index.js' %}"></script>
+{% endblock %}

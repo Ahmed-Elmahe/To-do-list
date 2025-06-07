@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+</head>
+<body>
+    <div class="login-container">
+        <h2>Welcome Back</h2>
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            {% if error %}
+                <div class="error-message" style="color: red;">{{ error }}</div>
+            {% endif %}
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
+            <button type="submit">Log In</button>
+        </form>
+        <div class="links">
+            <a href="{% url 'signup' %}">Create Account</a>
+        </div>
+    </div>
+</body>
+</html>
