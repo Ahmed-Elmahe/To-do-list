@@ -23,7 +23,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-fjs6+s44p0^fgv*+qp+ub!c#o%d_y#ub1#edcw^7b_t566m#hp'
 CSRF_TRUSTED_ORIGINS = ["https://todoflow.up.railway.app"]
-CSRF_TRUSTED_ORIGINS = getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
