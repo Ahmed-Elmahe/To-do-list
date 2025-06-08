@@ -5,3 +5,8 @@ __pycache__/
 *.pyd
 .Python
 db.sqlite3
+database.txt
+.gitignore
+*.log
+*.sqlite3
+*.db
